@@ -21,10 +21,75 @@ $(() => {
   $('#generate').click(() => {
     // Here you have to add your code for building a random battleground.
 
-    // Tip: The next line of code demonstrates how you can select a table cell
-    // using coordinates, remove CSS classes and add CSS classes. 
-    $('td[data-r="1"][data-c="1"]').removeClass('water').addClass('ship');
-    $('td[data-r="2"][data-c="1"]').removeClass('water').addClass('ship');
-    $('td[data-r="3"][data-c="1"]').removeClass('water').addClass('ship');
+    ships = {"Carrier" : 5, "Battleship" : 4 , "Cruiser" : 3,"Submarine" :	3,"Destroyer" :	2};
+    var size = 0;
+
+    for (var key in ships) {
+      if (ships.hasOwnProperty(key)) {
+        c = Math.floor(Math.random() * 10);
+        r = Math.floor(Math.random() * 10);
+        while($('td[data-r="'+r+'"][data-c="'+c+'"]').hasClass('ship') || isSingle(c,r)){
+          c = Math.floor(Math.random() * 10);
+          r = Math.floor(Math.random() * 10);
+        }
+        $('td[data-r="'+r+'"][data-c="'+c+'"]').removeClass('water').addClass('ship');
+        size = ships[key] - 1;
+        for(i = 0; i < size; i++){
+          direction = findeAvailableDirection(c,r);
+          
+          switch(direction){
+            case 1:
+              r = r + 1;
+              break;
+            case 2:
+              r = r -1;
+              break;
+            case 3:
+              c = c - 1;
+              break;
+            case 4:
+              c = c +1;
+          }
+
+          $('td[data-r="'+r+'"][data-c="'+c+'"]').removeClass('water').addClass('ship');
+        }
+      }
+  }
   });
 });
+function surroundedWithShips(c, r){
+  var surrounded = $('td[data-r="'+r+1+'"][data-c="'+c+'"]').hasClass('ship') 
+            && $('td[data-r="'+r-1+'"][data-c="'+c+'"]').hasClass('ship') 
+            && $('td[data-r="'+r+'"][data-c="'+c+1+'"]').hasClass('ship') 
+            && $('td[data-r="'+r+'"][data-c="'+c-1+'"]').hasClass('ship');
+  
+  return surrounded;
+}
+function isSingle(c,r){
+  var single = $('td[data-r="'+(r+1)+'"][data-c="'+c+'"]').hasClass('ship') 
+        || $('td[data-r="'+(r-1)+'"][data-c="'+c+'"]').hasClass('ship') 
+        || $('td[data-r="'+r+'"][data-c="'+(c+1)+'"]').hasClass('ship') 
+        || $('td[data-r="'+r+'"][data-c="'+(c-1)+'"]').hasClass('ship')
+        || $('td[data-r="'+(r+1)+'"][data-c="'+(c+1)+'"]').hasClass('ship')
+        || $('td[data-r="'+(r-1)+'"][data-c="'+(c-1)+'"]').hasClass('ship')
+        || $('td[data-r="'+(r+1)+'"][data-c="'+(c-1)+'"]').hasClass('ship')
+        || $('td[data-r="'+(r-1)+'"][data-c="'+(c+1)+'"]').hasClass('ship')
+
+  return single;
+}
+function findeAvailableDirection(c,r){
+  directions = [];    //-> 1 = up, 2 = down, 3 = left, 4 = rights
+  if(!$('td[data-r="'+(r+1)+'"][data-c="'+c+'"]').hasClass('ship'))
+    directions.push(1);
+  if(!$('td[data-r="'+(r-1)+'"][data-c="'+c+'"]').hasClass('ship'))
+    directions.push(2);
+  if(!$('td[data-r="'+r+'"][data-c="'+(c-1)+'"]').hasClass('ship'))
+    directions.push(3);
+  if(!$('td[data-r="'+r+'"][data-c="'+(c+1)+'"]').hasClass('ship'))
+    directions.push(4);
+  
+  if(!directions.empty()){
+    d = Math.floor(Math.random() * directions.size());
+  }
+  return d;
+}
